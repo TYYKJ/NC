@@ -12,6 +12,8 @@ def merge_csv_file(root_path):
     subdirs = subdirs[:-2]
     for i in range(1, 13):
         ff = str(i)
+        if len(ff) < 2:
+            ff = '0' + ff
         p = os.path.join(root_path, ff)
         files = os.listdir(p)
         for f in files:
@@ -27,4 +29,5 @@ def distinct(file):
     print('完成去重')
 
 
-distinct(r'E:\PycharmProjects\ncDataProcess\processed\merge_files\120.5-35.0.csv')
+# distinct(r'C:\Users\mores\Desktop\templateProject\120.5-35.0.csv')
+merge_csv_file('processed')
