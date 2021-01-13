@@ -65,6 +65,8 @@ class OperateFiles:
             for file in tqdm(files_dict[files], desc='读取NC'):
                 dataset = self._nc.load_nc_data(file)
                 lon, lat = self._nc.get_part_lon_lat(dataset, self._lon, self._lat)
+                assert lon == [], '经度为空,检查经纬度设置'
+                assert lat == [], '纬度为空,检查经纬度设置'
                 _time = self._nc.get_time(dataset)
                 for single_lon in tqdm(lon[0], desc='单一lon'):
                     for single_lat in tqdm(lat[0], desc='单一lat'):
