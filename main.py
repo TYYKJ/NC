@@ -1,10 +1,28 @@
+import multiprocessing
 import os
 import shutil
+import threading
+import time
+from functools import wraps
+from multiprocessing import Process
+
 import pandas as pd
 import yaml
 from tqdm import tqdm
 
 import nc_data_extract
+
+
+def timethis(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.perf_counter()
+        r = func(*args, **kwargs)
+        end = time.perf_counter()
+        print('{}.{} : {}'.format(func.__module__, func.__name__, end - start))
+        return r
+
+    return wrapper
 
 
 class OperateFiles:
@@ -49,7 +67,7 @@ class OperateFiles:
                     nc_file_path[folder.split('.')[-1]] = files
 
         keys = nc_file_path.keys()
-        for key in tqdm(keys):
+        for key in keys:
             cache = []
             for file in nc_file_path.get(key):
                 full_path = os.path.join(key, file)
@@ -58,23 +76,36 @@ class OperateFiles:
 
         return nc_file_path
 
+    @timethis
     def get_data(self):
         files_dict = self.get_files()
         keys = files_dict.keys()
         for files in tqdm(keys, desc='nc列表加载'):
-            for file in tqdm(files_dict[files], desc='读取NC'):
-                dataset = self._nc.load_nc_data(file)
-                lon, lat = self._nc.get_part_lon_lat(dataset, self._lon, self._lat)
-                assert lon == [], '经度为空,检查经纬度设置'
-                assert lat == [], '纬度为空,检查经纬度设置'
-                _time = self._nc.get_time(dataset)
-                for single_lon in tqdm(lon[0], desc='单一lon'):
-                    for single_lat in tqdm(lat[0], desc='单一lat'):
-                        data = self._nc.get_part_data(dataset, single_lon, single_lat)
-                        attributes = data.keys()
-                        for k in tqdm(attributes, desc='属性拼接'):
-                            csv_name = f"{single_lon}-{single_lat}.csv"
-                            self.append2csv(_time, data[k], k, files, csv_name)
+            # 每个进程负责一个月的数据处理
+            Process(target=self.multiprocess_accelerate, args=(files_dict, files)).start()
+
+    def multiprocess_accelerate(self, files_dict, files):
+        """
+        负责一个月数据提取的进程加速
+
+        :param files_dict:
+        :param files:
+        :return:
+        """
+        for file in files_dict[files]:
+            dataset = self._nc.load_nc_data(file)
+            lon, lat = self._nc.get_part_lon_lat(dataset, self._lon, self._lat)
+
+            _time = self._nc.get_time(dataset)
+            for single_lon in lon[0]:
+                for single_lat in lat[0]:
+                    data = self._nc.get_part_data(dataset, single_lon, single_lat)
+                    attributes = data.keys()
+                    for k in tqdm(attributes,
+                                  desc=f'进程{multiprocessing.current_process().name}正在处理{single_lon}-{single_lat}位置数据'):
+                        csv_name = f"{single_lon}-{single_lat}.csv"
+
+                        self.append2csv(_time, data[k], k, files, csv_name)
 
     @staticmethod
     def append2csv(data_time, data, column_name, subdir, csv_name):
@@ -88,17 +119,21 @@ class OperateFiles:
         :param csv_name: csv文件名
         :return:
         """
-        
+
         subdir = subdir.split('\\')[-1]
-        
+
         processed_path = 'processed'
         csv_saved_path = os.path.join(os.path.join(processed_path, subdir), csv_name)
 
         try:
-            df = pd.read_csv(csv_saved_path, index_col=0)
-            if column_name not in df.columns:
-                df[column_name] = data
-                df.to_csv(csv_saved_path)
+            try:
+                df = pd.read_csv(csv_saved_path, index_col=0, engine='python')
+                if column_name not in df.columns:
+                    df[column_name] = data
+                    df.to_csv(csv_saved_path)
+            except pd.errors.EmptyDataError:
+                pass
+
         except FileNotFoundError:
 
             data_dict = {'time': data_time, column_name: data}
