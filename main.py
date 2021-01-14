@@ -76,13 +76,16 @@ class OperateFiles:
 
         return nc_file_path
 
-    @timethis
+    # @timethis
     def get_data(self):
         files_dict = self.get_files()
         keys = files_dict.keys()
         for files in tqdm(keys, desc='nc列表加载'):
             # 每个进程负责一个月的数据处理
-            Process(target=self.multiprocess_accelerate, args=(files_dict, files)).start()
+            # p = multiprocessing.Process(target=self.multiprocess_accelerate, args=(files_dict, files))
+            p = threading.Thread(target=self.multiprocess_accelerate, args=(files_dict, files))
+            p.start()
+            p.join()
 
     def multiprocess_accelerate(self, files_dict, files):
         """
@@ -102,7 +105,7 @@ class OperateFiles:
                     data = self._nc.get_part_data(dataset, single_lon, single_lat)
                     attributes = data.keys()
                     for k in tqdm(attributes,
-                                  desc=f'进程{multiprocessing.current_process().name}正在处理{single_lon}-{single_lat}位置数据'):
+                                  desc=f'正在处理{single_lon}-{single_lat}位置数据'):
                         csv_name = f"{single_lon}-{single_lat}.csv"
 
                         self.append2csv(_time, data[k], k, files, csv_name)
@@ -155,4 +158,10 @@ def load_config():
 
 
 if __name__ == '__main__':
+    import time
+
+    start = time.time()
     OperateFiles().get_data()
+    end = time.time()
+
+    print(f'消耗时间{end - start}s')
