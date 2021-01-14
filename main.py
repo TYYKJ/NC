@@ -1,28 +1,13 @@
-import multiprocessing
 import os
 import shutil
 import threading
-import time
 from functools import wraps
-from multiprocessing import Process
 
 import pandas as pd
 import yaml
 from tqdm import tqdm
 
 import nc_data_extract
-
-
-def timethis(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start = time.perf_counter()
-        r = func(*args, **kwargs)
-        end = time.perf_counter()
-        print('{}.{} : {}'.format(func.__module__, func.__name__, end - start))
-        return r
-
-    return wrapper
 
 
 class OperateFiles:
@@ -33,11 +18,11 @@ class OperateFiles:
         self._lon = self._config['lon']
         self._lat = self._config['lat']
         self.make_dir()
-        self.get_data()
 
     def make_dir(self):
         try:
             os.mkdir('processed')
+            os.mkdir('merge_data')
             nc_file_path = self.get_files()
             keys = nc_file_path.keys()
             for key in keys:
@@ -76,7 +61,6 @@ class OperateFiles:
 
         return nc_file_path
 
-    # @timethis
     def get_data(self):
         files_dict = self.get_files()
         keys = files_dict.keys()
@@ -143,6 +127,28 @@ class OperateFiles:
             df = pd.DataFrame(data_dict)
             df.to_csv(csv_saved_path)
 
+    def merge_csv_file(self):
+        """
+        合并数据
+
+        :return:
+        """
+
+        nc_file_path = self.get_files()
+        keys = nc_file_path.keys()
+        dir_name = []
+        for key in keys:
+            dir_name.append(key.split('\\')[-1])
+
+        for month in dir_name:
+            p = os.path.join('processed', month)
+            files = os.listdir(p)
+            for f in files:
+                f_p = os.path.join(p, f)
+                con = pd.read_csv(f_p, index_col=0)
+                con.to_csv(f'merge_data/{f}', mode='a+', index='time')
+        shutil.rmtree('processed')
+
 
 def load_config():
     """
@@ -161,7 +167,9 @@ if __name__ == '__main__':
     import time
 
     start = time.time()
-    OperateFiles().get_data()
+    op = OperateFiles()
+    op.get_data()
+    op.merge_csv_file()
     end = time.time()
 
-    print(f'消耗时间{end - start}s')
+    print(f'消耗时间{end - start:.2f}s')
