@@ -12,7 +12,7 @@ class NC:
         :param path: file path
         :return: ds: dataset
         """
-        assert path[-2:] == 'nc', 'file format must be .nc'
+        assert path.endswith('nc'), '文件格式必须以 .nc 结尾'
         ds = xr.open_dataset(path)
         return ds
 

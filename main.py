@@ -1,7 +1,8 @@
 import os
+import platform
 import shutil
 import threading
-import platform
+
 import pandas as pd
 import yaml
 from tqdm import tqdm
@@ -16,6 +17,7 @@ class OperateFiles:
         self.root_path = self._config['root_path']
         self._lon = self._config['lon']
         self._lat = self._config['lat']
+        self.now_os = platform.platform()
         self.make_dir()
 
     def make_dir(self):
@@ -25,8 +27,7 @@ class OperateFiles:
             nc_file_path = self.get_files()
             keys = nc_file_path.keys()
             for key in keys:
-                now_os = platform.platform()
-                if 'Windows' in now_os:
+                if 'Windows' in self.now_os:
                     dir_name = key.split('\\')[-1]
                     os.mkdir(f'processed/{dir_name}')
                 else:
@@ -103,8 +104,7 @@ class OperateFiles:
 
                         self.append2csv(_time, data[k], k, files, csv_name)
 
-    @staticmethod
-    def append2csv(data_time, data, column_name, subdir, csv_name):
+    def append2csv(self, data_time, data, column_name, subdir, csv_name):
         """
         追加数据到csv文件
 
@@ -115,8 +115,10 @@ class OperateFiles:
         :param csv_name: csv文件名
         :return:
         """
-
-        subdir = subdir.split('\\')[-1]
+        if self.now_os == 'Windows':
+            subdir = subdir.split('\\')[-1]
+        else:
+            subdir = subdir.split('/')[-1]
 
         processed_path = 'processed'
         csv_saved_path = os.path.join(os.path.join(processed_path, subdir), csv_name)
