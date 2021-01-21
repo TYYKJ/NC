@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f0cb54d0-ee54-4bcf-bdb9-905b92a1bfc7" name="默认的" comment="update">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.yml" beforeDir="false" afterPath="$PROJECT_DIR$/config.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nc_data_extract.py" beforeDir="false" afterPath="$PROJECT_DIR$/nc_data_extract.py" afterDir="false" />
+    <list default="true" id="f0cb54d0-ee54-4bcf-bdb9-905b92a1bfc7" name="默认的" comment="依赖">
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -189,7 +187,7 @@
       <workItem from="1610610008699" duration="66000" />
       <workItem from="1610674793087" duration="102000" />
       <workItem from="1610675312751" duration="9000" />
-      <workItem from="1611195357468" duration="909000" />
+      <workItem from="1611195357468" duration="1136000" />
     </task>
     <task id="LOCAL-00001" summary="添加部分经纬度为空的异常溢出">
       <created>1610517811842</created>
@@ -240,7 +238,21 @@
       <option name="project" value="LOCAL" />
       <updated>1610609566213</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="修正无经纬度数据不报错、无MAPSTAT等属性报错问题">
+      <created>1611196320159</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1611196320159</updated>
+    </task>
+    <task id="LOCAL-00009" summary="依赖">
+      <created>1611196454088</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1611196454088</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -266,7 +278,9 @@
     <MESSAGE value="baseline配置" />
     <MESSAGE value="readme" />
     <MESSAGE value="update" />
-    <option name="LAST_COMMIT_MESSAGE" value="update" />
+    <MESSAGE value="修正无经纬度数据不报错、无MAPSTAT等属性报错问题" />
+    <MESSAGE value="依赖" />
+    <option name="LAST_COMMIT_MESSAGE" value="依赖" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
