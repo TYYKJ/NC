@@ -20,6 +20,7 @@ class OperateFiles:
         self.make_dir()
 
     def make_dir(self):
+        """创建文件夹"""
         try:
             os.mkdir('processed')
             os.mkdir('merge_data')
