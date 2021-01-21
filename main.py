@@ -1,12 +1,11 @@
 import os
-import platform
 import shutil
 import threading
 
 import pandas as pd
 import yaml
 from tqdm import tqdm
-
+import platform
 import nc_data_extract
 
 
@@ -27,6 +26,7 @@ class OperateFiles:
             nc_file_path = self.get_files()
             keys = nc_file_path.keys()
             for key in keys:
+
                 if 'Windows' in self.now_os:
                     dir_name = key.split('\\')[-1]
                     os.mkdir(f'processed/{dir_name}')
@@ -54,12 +54,17 @@ class OperateFiles:
 
         :return: dict
         """
+        cache = []
         nc_file_path = dict()
         for folder, subdir, files in os.walk(self.root_path):
             if not subdir:
                 # 有文件的话将整个文件列表加到字典里
                 if files:
-                    nc_file_path[folder.split('.')[-1]] = files
+                    for file in files:
+                        if file.endswith('nc'):
+                            cache.append(file)
+                    nc_file_path[folder.split('.')[-1]] = cache
+                    cache = []
 
         keys = nc_file_path.keys()
         for key in keys:
@@ -115,7 +120,7 @@ class OperateFiles:
         :param csv_name: csv文件名
         :return:
         """
-        if self.now_os == 'Windows':
+        if 'Windows' in self.now_os:
             subdir = subdir.split('\\')[-1]
         else:
             subdir = subdir.split('/')[-1]
@@ -149,7 +154,7 @@ class OperateFiles:
         keys = nc_file_path.keys()
         dir_name = []
         for key in keys:
-            if self.now_os == 'Windows':
+            if 'Windows' in self.now_os:
                 dir_name.append(key.split('\\')[-1])
             else:
                 dir_name.append(key.split('/')[-1])
