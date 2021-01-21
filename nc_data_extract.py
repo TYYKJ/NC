@@ -59,7 +59,7 @@ class NC:
         for lo_index, la_index in zip(lon_index, lat_index):
             lat_need.append(lat[la_index])
             lon_need.append(lon[lo_index])
-
+        assert lat_need != [] and lon_need != [], '获取到经纬度为空'
         return lon_need, lat_need
 
     @staticmethod
@@ -82,13 +82,21 @@ class NC:
         """
         # 获取一个文件内所有的变量 (有些文件可能会有多个 比如风 u\v)
         attr = self.get_nc_attributes(dataset)
-        # 移除MAPSTA
-        attr.remove('MAPSTA')
-        # 获取固定经纬度下的数据
-        d = dataset.sel(longitude=lon, latitude=lat, method='nearest')
-        # 因为可能有很多属性,所以用字典保存,key是属性,value是值
-        need_data = dict()
-        for item in attr:
-            need_data[item] = d[item].values
+        try:
+            # 移除MAPSTA
+            attr.remove('MAPSTA')
+            # 获取固定经纬度下的数据
+            d = dataset.sel(longitude=lon, latitude=lat, method='nearest')
+            # 因为可能有很多属性,所以用字典保存,key是属性,value是值
+            need_data = dict()
+            for item in attr:
+                need_data[item] = d[item].values
+        except ValueError:
+            # 获取固定经纬度下的数据
+            d = dataset.sel(longitude=lon, latitude=lat, method='nearest')
+            # 因为可能有很多属性,所以用字典保存,key是属性,value是值
+            need_data = dict()
+            for item in attr:
+                need_data[item] = d[item].values
 
         return need_data
