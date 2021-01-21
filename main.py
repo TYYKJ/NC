@@ -1,7 +1,7 @@
 import os
 import shutil
 import threading
-
+import platform
 import pandas as pd
 import yaml
 from tqdm import tqdm
@@ -25,16 +25,26 @@ class OperateFiles:
             nc_file_path = self.get_files()
             keys = nc_file_path.keys()
             for key in keys:
-                dir_name = key.split('\\')[-1]
-                os.mkdir(f'processed/{dir_name}')
+                now_os = platform.platform()
+                if 'Windows' in now_os:
+                    dir_name = key.split('\\')[-1]
+                    os.mkdir(f'processed/{dir_name}')
+                else:
+                    dir_name = key.split('/')[-1]
+                    os.mkdir(f'processed/{dir_name}')
         except FileExistsError:
             shutil.rmtree('processed')
             os.mkdir('processed')
             nc_file_path = self.get_files()
             keys = nc_file_path.keys()
             for key in keys:
-                dir_name = key.split('\\')[-1]
-                os.mkdir(f'processed/{dir_name}')
+                now_os = platform.platform()
+                if 'Windows' in now_os:
+                    dir_name = key.split('\\')[-1]
+                    os.mkdir(f'processed/{dir_name}')
+                else:
+                    dir_name = key.split('/')[-1]
+                    os.mkdir(f'processed/{dir_name}')
 
     def get_files(self):
         """
