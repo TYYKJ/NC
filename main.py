@@ -149,7 +149,10 @@ class OperateFiles:
         keys = nc_file_path.keys()
         dir_name = []
         for key in keys:
-            dir_name.append(key.split('\\')[-1])
+            if self.now_os == 'Windows':
+                dir_name.append(key.split('\\')[-1])
+            else:
+                dir_name.append(key.split('/')[-1])
 
         for month in dir_name:
             p = os.path.join('processed', month)
