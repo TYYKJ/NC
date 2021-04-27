@@ -166,7 +166,7 @@ class OperateFiles:
             for f in files:
                 f_p = os.path.join(p, f)
                 con = pd.read_csv(f_p, index_col=0)
-                con.to_csv(f'merge_data/{f}', mode='a+', index='time')
+                con.to_csv(f'merge_data/{f}', mode='a+', index='time', header=None)
         shutil.rmtree('processed')
 
 
