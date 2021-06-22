@@ -121,31 +121,44 @@ def getValue(value):
 
 
 if __name__ == '__main__':
+    # 原始nc的目录
     originalNCPath = r'H:\D资料\workspace\python\
         pycharm\NC-master\ncTriangle\ww3.200901_wnd.nc'
+    # 新生成nc文件的目录
     newNCPath = r'H:\D资料\workspace\python\pycharm\NC-master\ncTriangle\wnd.nc'
     start = time.time()
     print(time.time())
     nc = NC()
     dataSet = nc.load_nc_data(originalNCPath)
+    # 获取经纬度
     lon, lat = nc.get_all_lon_lat(dataSet)
+    # 获取时间
     timeValue = nc.get_time(dataSet)
     print(nc.get_nc_attributes(dataSet))
     print(time.time() - start)
+    # 获取所有值的字典
     value = {}
     for i in range(1, len(nc.get_nc_attributes(dataSet))):
         key = nc.get_nc_attributes(dataSet)[i]
         value[key] = dataSet.data_vars[key].values
 
+    # 海陆掩码数据
     mask = dataSet.data_vars[nc.get_nc_attributes(dataSet)[0]].values
+    # 海洋经纬度索引
     latSum, lonSum = getOceanArea(mask)
+    # 海洋经纬度
     lat, lon = getLonLat(lat, lon, latSum, lonSum)
     print(time.time() - start)
+
+    # 在海洋经纬度下的掩码值
     maskValueFirst = mask[latSum]
     maskValue = maskValueFirst[:,  lonSum]
     print(time.time() - start)
+    # 生成海洋经纬度下值的字典
     valueArray = getValue(value)
     print(time.time() - start)
+
+    # 生成Dataset
     ds = xr.Dataset(data_vars=dict(MASPATA=(['latitude', 'longitude'],
                                             maskValue),
                                    uwnd=(['time', 'latitude', 'longitude'],
@@ -155,4 +168,6 @@ if __name__ == '__main__':
                     coords=dict(longitude=lon,
                                 latitude=lat,
                                 time=timeValue), )
+    # 生成nc文件
     ds.to_netcdf(newNCPath)
+
